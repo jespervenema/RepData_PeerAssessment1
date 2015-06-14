@@ -1,1 +1,91 @@
+###Load the data
+
+```{r, echo=TRUE}
+data <- read.csv("activity.csv")
+```
+
+###Number of steps taken per day
+
+```{r, echo=TRUE}
+library(data.table)
+tabledata <- data.table(data)
+sum_date <- as.data.frame(tabledata[, sum(steps, na.rm = TRUE),by = date])
+sum_date
+```
+
+###histogram of the total number of steps taken each day
+
+```{r, echo=TRUE}
+library(lattice)
+histogram( ~ data$steps | data$date)
+```
+
+
+###Mean and median of the total number of steps taken per day
+
+```{r, echo=TRUE}
+tabledata <- data.table(data)
+mean_date <- as.data.frame(tabledata[, mean(steps, na.rm = TRUE),by = date])
+mean_date
+median_date <- as.data.frame(tabledata[, as.numeric(median(steps, na.rm = TRUE)),by = date])
+median_date
+```
+
+###Average number of steps taken by interval for all days
+
+```{r, echo=TRUE}
+mean_interval <- as.data.frame(tabledata[, mean(steps, na.rm = TRUE),by = interval])
+mean_interval
+plot(mean_interval,xlab = "interval", ylab = "average steps")
+```
+
+The maximum number of steps for an interval can be seen from the table above: 206 steps, corresponding to interval mumber 835.
+
+
+###Calculate missing values
+
+```{r, echo=TRUE}
+dataw <- data[complete.cases(data),]
+nrow(dataw)
+```
+
+###Imputing missing values and calculation of revised mean and median of the total number of steps taken per day
+
+```{r, echo=TRUE}
+data$steps[is.na(data$steps)] <- mean(data$steps, na.rm = TRUE)
+
+tabledata <- data.table(data)
+mean_date <- as.data.frame(tabledata[, mean(steps, na.rm = TRUE),by = date])
+mean_date
+median_date <- as.data.frame(tabledata[, as.numeric(median(steps, na.rm = TRUE)),by = date])
+median_date
+```
+
+### Activity patterns between weekdays and weekends
+
+```{r, echo=TRUE}
+
+data$weekday <- weekdays(as.Date(data$date))
+
+data$weekday[data$weekday=="Monday"] <- "weekday"
+data$weekday[data$weekday=="Tuesday"] <- "weekday"
+data$weekday[data$weekday=="Wednesday"] <- "weekday"
+data$weekday[data$weekday=="Thursday"] <- "weekday"
+data$weekday[data$weekday=="Friday"] <- "weekday"
+data$weekday[data$weekday=="Saturday"] <- "weekend"
+data$weekday[data$weekday=="Sunday"] <- "weekend"
+
+
+datas1 <- subset(data, data$weekday=="weekday")
+tabledata1 <- data.table(datas1)
+mean_interval <- as.data.frame(tabledata1[, mean(steps, na.rm = TRUE),by = interval])
+plot(mean_interval, xlab = "interval", ylab = "average steps", main="weekdays")
+
+
+datas2 <- subset(data, data$weekday=="weekend")
+tabledata2 <- data.table(datas2)
+mean_interval <- as.data.frame(tabledata2[, mean(steps, na.rm = TRUE),by = interval])
+plot(mean_interval,xlab = "interval", ylab = "average steps", main="weekend")
+
+```
 
